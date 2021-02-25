@@ -167,17 +167,17 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#mana-implementation-proposal" id="mana-implementation-proposal">Mana Implementation Proposal</a></h1>
+                        <h1 id="mana-implementation-proposal"><a class="header" href="#mana-implementation-proposal">Mana Implementation Proposal</a></h1>
 <p>The goal of this document is to provide a high level overview of how mana will be implemented in GoShimmer.</p>
-<h2><a class="header" href="#introduction" id="introduction">Introduction</a></h2>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
 <p>Mana is a reputation system for nodes within the IOTA network.</p>
 <p>Reputation is gained by contributing to the network, i.e. creating value transfers.
 As time passes, part of the earned mana of a node decays to encourage keeping up the good behavior.</p>
-<h2><a class="header" href="#scope" id="scope">Scope</a></h2>
+<h2 id="scope"><a class="header" href="#scope">Scope</a></h2>
 <p>The scope of the first implementation of mana into GoShimmer is to verify that mana calculations work,
 study base mana calculations 1 &amp; 2, and mana distribution in the test network, furthermore to verify that nodes have
 similar view on the network.</p>
-<h2><a class="header" href="#mana-calculation" id="mana-calculation">Mana Calculation</a></h2>
+<h2 id="mana-calculation"><a class="header" href="#mana-calculation">Mana Calculation</a></h2>
 <p>Mana is essentially the reputation score of a node in the IOTA network. Mana is calculated locally in each node, as a
 function that takes value transactions as input and produces the Base Mana Vector as output.</p>
 <p>Each transaction has an <code>accessMana</code> and <code>consensusMana</code> field that determine which node to pledge these two types
@@ -222,8 +222,8 @@ module (FPC, Autopeering, DRNG, Rate Control, tools, etc.).</p>
 <p>The reason for having two separate <code>Base Mana Vectors</code> is the fact, that <code>accessMana</code> and <code>consensusMana</code> can be pledged
 to different nodes.</p>
 <p>The exact mathematical formulas, and their respective parameters will be determined later.</p>
-<h2><a class="header" href="#challenges" id="challenges">Challenges</a></h2>
-<h3><a class="header" href="#dependency-on-tangle" id="dependency-on-tangle">Dependency on Tangle</a></h3>
+<h2 id="challenges"><a class="header" href="#challenges">Challenges</a></h2>
+<h3 id="dependency-on-tangle"><a class="header" href="#dependency-on-tangle">Dependency on Tangle</a></h3>
 <p>Since mana is awarded to nodes submitting value transfers, the tangle is needed as input for mana calculation.
 Each node calculates mana locally, therefore, it is essential to determine when to consider transactions in the
 tangle &quot;final enough&quot; (so that they will not be orphaned).</p>
@@ -233,18 +233,18 @@ module.</p>
 <p>The Mana module assumes, that the (value) tangle's <code>TransactionConfirmed</code> event is the trigger condition to update the
 mana state machine (base mana vectors for access and consensus mana). Once the concept of transaction finality is
 introduced for the tangle, the trigger conditions for access and consensus mana calculations can be adjusted.</p>
-<h3><a class="header" href="#transaction-layout" id="transaction-layout">Transaction Layout</a></h3>
+<h3 id="transaction-layout"><a class="header" href="#transaction-layout">Transaction Layout</a></h3>
 <p>A new field should be added to <code>Transaction</code> denoting <code>PledgedNodeID</code> for <code>Access Mana</code> and <code>Consensus Mana</code>.
 This is also beneficial to implement mana donation feature, that is, to donate the mana of a certain transaction to an
 arbitrary node.</p>
-<h2><a class="header" href="#limitations" id="limitations">Limitations</a></h2>
+<h2 id="limitations"><a class="header" href="#limitations">Limitations</a></h2>
 <p>The first implementation of mana in GoShimmer will:</p>
 <ul>
 <li>not have voted timestamps on value transactions,</li>
 <li>lack proper <code>TransactionConfirmed</code> mechanism to trigger mana update,</li>
 <li>lack integration into rate control/autopeering/fpc/etc.</li>
 </ul>
-<h2><a class="header" href="#detailed-design" id="detailed-design">Detailed Design</a></h2>
+<h2 id="detailed-design"><a class="header" href="#detailed-design">Detailed Design</a></h2>
 <p>In this section, detailed GoShimmer implementation design considerations will be outlined about the mana module.
 In short, changes can be classified into 3 categories:</p>
 <ol>
@@ -252,7 +252,7 @@ In short, changes can be classified into 3 categories:</p>
 <li>Mana module functionality,</li>
 <li>and related tools/utilities, such as API, visualization, analytics.</li>
 </ol>
-<h3><a class="header" href="#transaction" id="transaction">Transaction</a></h3>
+<h3 id="transaction"><a class="header" href="#transaction">Transaction</a></h3>
 <p>As described above, 3 new fields will be added to the transaction layout:</p>
 <ol>
 <li><code>Timestamp</code> time.time</li>
@@ -291,7 +291,7 @@ that works like this:</p>
 <p>This way node owners can decide who their transactions are pledging mana to. It could be only their node, or they could
 provide mana pledging as a service. They could delegate access mana to others, but hold own to consensus mana, or the
 other way around.</p>
-<h3><a class="header" href="#initialization" id="initialization">Initialization</a></h3>
+<h3 id="initialization"><a class="header" href="#initialization">Initialization</a></h3>
 <p>Mana state machine is an extension of the ledger state, hence its calculation depends on the ledger state perception
 of the node. Snapshotting is the mechanism that saves the ledger states and prunes unnecessary transactions. Together
 with the ledger state, base mana vectors are also saved, since a certain ledger state reflects a certain mana distribution
@@ -308,7 +308,7 @@ of messages in the tangle. Mana calculation only adds to this burden. It will be
 <p>In Pollen test network, all funds are initially held by the faucet node, therefore all mana present at bootstrap belong
 to this node. Whenever a transaction is requested from the faucet, it pledges mana to the requesting node, helping other
 nodes to increase their mana.</p>
-<h3><a class="header" href="#mana-package" id="mana-package">Mana Package</a></h3>
+<h3 id="mana-package"><a class="header" href="#mana-package">Mana Package</a></h3>
 <p>The functionality of the mana module should be implemented in a <code>mana</code> package. Then, a <code>mana plugin</code> can use the package
 structs and methods to connect the dots, for example execute <code>BookMana</code> when <code>TransactionConfirmed</code> event is triggered
 in the value tangle.</p>
@@ -329,7 +329,7 @@ of mana this vector deals with (Access, Consensus, etc.).</p>
 	vectorType Type
 }
 </code></pre>
-<h4><a class="header" href="#methods" id="methods">Methods</a></h4>
+<h4 id="methods"><a class="header" href="#methods">Methods</a></h4>
 <p><code>BaseManaVector</code> should have the following methods:</p>
 <ul>
 <li><code>BookMana(transaction)</code>: Book mana of a transaction. Trigger <code>ManaBooked</code> event. Note, that this method updates
@@ -351,14 +351,14 @@ this method also updates <code>BaseMana</code> of the node with respect to time.
 <li><code>updateBM2(time)</code>: update <code>Base Mana 2</code> wrt to <code>time</code>.</li>
 <li><code>updateEBM2(time)</code>: update <code>Effective Base Mana 2</code> wrt to <code>time</code>.</li>
 </ul>
-<h4><a class="header" href="#base-mana-calculation" id="base-mana-calculation">Base Mana Calculation</a></h4>
+<h4 id="base-mana-calculation"><a class="header" href="#base-mana-calculation">Base Mana Calculation</a></h4>
 <p>There are two cases when the values within <code>Base Mana Vector</code> are updated:</p>
 <ol>
 <li>A confirmed transaction pledges mana.</li>
 <li>Any module accesses the <code>Base Mana Vector</code>, and hence its values are updated with respect to <code>access time</code>.</li>
 </ol>
 <p>First, let's explore the former.</p>
-<h5><a class="header" href="#a-confirmed-transaction-pledges-mana" id="a-confirmed-transaction-pledges-mana">A confirmed transaction pledges mana</a></h5>
+<h5 id="a-confirmed-transaction-pledges-mana"><a class="header" href="#a-confirmed-transaction-pledges-mana">A confirmed transaction pledges mana</a></h5>
 <p>For simplicity, we only describe mana calculation for one of the Base Mana Vectors, namely, the Base Access Mana Vector.</p>
 <p>First, a <code>TransactionConfirmed</code> event is triggered, therefore <code>BaseManaVector.BookMana(transaction)</code> is executed:</p>
 <pre><code class="language-go">func (bmv *BaseManaVector) BookMana(tx *transaction) {
@@ -485,7 +485,7 @@ The same approach is applied in <code>updateEBM2()</code>.</p>
 	}
 }
 </code></pre>
-<h5><a class="header" href="#any-module-accesses-the-base-mana-vector" id="any-module-accesses-the-base-mana-vector">Any module accesses the Base Mana Vector</a></h5>
+<h5 id="any-module-accesses-the-base-mana-vector"><a class="header" href="#any-module-accesses-the-base-mana-vector">Any module accesses the Base Mana Vector</a></h5>
 <p>In this case, the accessed entries within <code>Base Mana Vector</code> are updated via the method:</p>
 <pre><code class="language-go">func (bmv *BaseManaVector) update(nodeID ID, t time.Time ) {
     oldMana :=  bmv[nodeID]
@@ -503,7 +503,7 @@ The same approach is applied in <code>updateEBM2()</code>.</p>
     bm.LastUpdated = t
 }
 </code></pre>
-<h4><a class="header" href="#events" id="events">Events</a></h4>
+<h4 id="events"><a class="header" href="#events">Events</a></h4>
 <p>The mana package should have the following events:</p>
 <ul>
 <li><code>Pledged</code> when mana (<code>BM1</code> and <code>BM2</code>) was pledged for a node due to new transactions being confirmed.</li>
@@ -536,13 +536,13 @@ The same approach is applied in <code>updateEBM2()</code>.</p>
     Type    ManaType // access or consensus
 }
 </code></pre>
-<h4><a class="header" href="#testing" id="testing">Testing</a></h4>
+<h4 id="testing"><a class="header" href="#testing">Testing</a></h4>
 <ul>
 <li>Write unit tests for all methods.</li>
 <li>Test all events and if they are correctly triggered.</li>
 <li>Benchmark calculations in tests to see how heavy it is to calculate EMAs and decays.</li>
 </ul>
-<h3><a class="header" href="#mana-plugin" id="mana-plugin">Mana Plugin</a></h3>
+<h3 id="mana-plugin"><a class="header" href="#mana-plugin">Mana Plugin</a></h3>
 <p>The <code>mana plugin</code> is responsible for:</p>
 <ul>
 <li>calculating mana from value transactions,</li>
@@ -567,7 +567,7 @@ consensusManaVector :=  BaseManaVector{vectorType: ConsensusMana}
 <p>In the future, it should be possible to combine <code>Effective Base Mana 1</code> and <code>Effective Base Mana 2</code> from a <code>BaseManaVector</code>
 in arbitrary proportions to arrive at a final mana value that other modules use. The <code>mana package</code> has these methods
 in place. Additionally, a parameter could be passed to the <code>getMana</code> type of exposed functions to set the proportions.</p>
-<h4><a class="header" href="#methods-1" id="methods-1">Methods</a></h4>
+<h4 id="methods-1"><a class="header" href="#methods-1">Methods</a></h4>
 <p>The mana plugin should expose utility functions to other modules:</p>
 <ul>
 <li><code>GetHighestManaNodes(type, n) [n]NodeIdManaTuple</code>: return the <code>n</code> highest <code>type</code> mana nodes (<code>nodeID</code>,<code>manaValue</code>) in
@@ -587,22 +587,22 @@ of the two). Trigger <code>ManaUpdated</code> event.</li>
 </ul>
 <p>Such utility functions could be used for example to visualize mana distribution in node dashboard, or send neighbor
 mana data to the analysis server for further processing.</p>
-<h4><a class="header" href="#booking-mana" id="booking-mana">Booking Mana</a></h4>
+<h4 id="booking-mana"><a class="header" href="#booking-mana">Booking Mana</a></h4>
 <p>Mana is booked when a transaction is confirmed.</p>
 <pre><code class="language-go">on TransactionConfirmed (tx):
  bookAccessMana()
  bookConsensusMana()
 </code></pre>
-<h4><a class="header" href="#synchronization-and-mana-calculation" id="synchronization-and-mana-calculation">Synchronization and Mana Calculation</a></h4>
+<h4 id="synchronization-and-mana-calculation"><a class="header" href="#synchronization-and-mana-calculation">Synchronization and Mana Calculation</a></h4>
 <p>The mana plugin is responsible to determine when to start calculating mana locally.
 Since mana state is an extension to ledger state, it can only depict realistic mana values once the node is in sync.
 During syncing, ledger state is constructed from messages coming from neighbors as described further above.</p>
 <p>In this first iteration, mana plugin relies on <code>TransactionConfirmed</code> event of the value transfers plugin, and has no
 explicit rules on when to start and stop mana calculation.</p>
 <p>In future, initial mana state (together with the initial ledger state) will be derived from a snapshot file.</p>
-<h3><a class="header" href="#mana-toolkit" id="mana-toolkit">Mana Toolkit</a></h3>
+<h3 id="mana-toolkit"><a class="header" href="#mana-toolkit">Mana Toolkit</a></h3>
 <p>In this section, all tools and utility functions for mana will be outlined.</p>
-<h4><a class="header" href="#mana-related-api-endpoints" id="mana-related-api-endpoints">Mana Related API endpoints</a></h4>
+<h4 id="mana-related-api-endpoints"><a class="header" href="#mana-related-api-endpoints">Mana Related API endpoints</a></h4>
 <ul>
 <li><code>/info</code>: Add own mana in node info response.</li>
 <li><code>value/allowedManaPledge</code>: Endpoint that clients can query to determine which nodeIDs are allowed as part of
@@ -619,7 +619,7 @@ explicit rules on when to start and stop mana calculation.</p>
 network owning mana, and a node is the 13th richest, it means that is part of the top 13% of mana holders, but not the
 top 12%.</li>
 </ul>
-<h4><a class="header" href="#metrics-collection" id="metrics-collection">Metrics collection</a></h4>
+<h4 id="metrics-collection"><a class="header" href="#metrics-collection">Metrics collection</a></h4>
 <p>To study the mana module, following metrics could be gathered:</p>
 <ul>
 <li>Amount of consensus and access mana present in the network. (amount varies because of <code>Base Mana 2</code>).</li>
@@ -631,14 +631,14 @@ top 12%.</li>
 <li>Mean and median mana holdings of nodes in the network. Shows how even mana distribution is.</li>
 <li>Average mana of neighbors.</li>
 </ul>
-<h4><a class="header" href="#visualization" id="visualization">Visualization</a></h4>
+<h4 id="visualization"><a class="header" href="#visualization">Visualization</a></h4>
 <p>Each node calculates mana locally, not only for themselves, but for all nodes in the network that it knows. As a result,
 mana perception of nodes may not be exactly the same at all times (due to network delay, processing capabilities), but
 should converge to the same state. A big question for visualization is which node's viewpoint to base mana visualization on? </p>
 <p>When running a node, operators will be shown the mana perception of their own node, but it also makes sense to
 display the perception of high mana nodes as the global mana perception. First, let's look at how local mana perception
 is visualized for a node:</p>
-<h5><a class="header" href="#local-perception" id="local-perception">Local Perception</a></h5>
+<h5 id="local-perception"><a class="header" href="#local-perception">Local Perception</a></h5>
 <p>There are two ways to visualize mana in GoShimmer:</p>
 <ol>
 <li>Node Local Dashboard</li>
@@ -661,7 +661,7 @@ data but can only visualize time series. Therefore, both of these ways will be u
 <li>Mana rank of the node over time.</li>
 <li>Average mana of neighbors.</li>
 </ul>
-<h5><a class="header" href="#global-perception" id="global-perception">Global Perception</a></h5>
+<h5 id="global-perception"><a class="header" href="#global-perception">Global Perception</a></h5>
 <p>Additionally, the Pollen Analyzer (analysis server) could be updated:</p>
 <ul>
 <li>Autopeering node graph, where size of a node corresponds to its mana value.</li>
